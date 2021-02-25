@@ -12,8 +12,8 @@ function readFileContent(path) {
 
 // 将内容写入文件
 function writeFile(data, targetFile) {
-    fs.writeFile(targetFile, JSON.stringify(data), e => {
-        console.log('generate file: ',targetFile)
+    fs.writeFile(targetFile, data, e => {
+        console.log('new file: ',targetFile)
     });
 }
 

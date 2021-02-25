@@ -1,5 +1,6 @@
 const yaml = require('js-yaml');
 const dayjs = require('dayjs');
+const path = require('path');
 
 const {split} = require('./util/frontMatter');
 const {parseMarkDown} = require('./util/marked');
@@ -65,8 +66,26 @@ function parseYml(path) {
  */
 function generateData(postSPath, ymlPath, targetPath) {
 
-    writeFile(getPostsData(postSPath), `${targetPath}/posts.json`);
-    writeFile(parseYml(ymlPath), `${targetPath}/config.json`);
+    const postDataPath = path.join(targetPath, 'posts.json');
+    const configDataPath = path.join(targetPath, 'config.json');
+    writeFile(JSON.stringify(getPostsData(postSPath), null, '\t'), postDataPath);
+    writeFile(JSON.stringify(parseYml(ymlPath), null, '\t'), configDataPath);
+}
+
+/**
+ * 根据模板文件生成目标文件
+ * @param templatePath 模板文件的路径
+ * @param targetPath 目标文件所在目录
+ * @param title 文件名称
+ */
+function generatePost(templatePath, targetPath, title) {
+    const filePath = path.join(targetPath, `${title}.md`);
+    const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const templateContent = readFileContent(templatePath)
+    // 替换标题和时间
+    const result = templateContent.replace(/\{\{ title }}/, title).replace(/\{\{ date }}/, now);
+    writeFile(result, filePath);
 }
 
 module.exports.generateData = generateData;
+module.exports.generatePost = generatePost;
