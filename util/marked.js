@@ -1,19 +1,6 @@
 const marked = require('marked');
 const hljs = require('highlight.js');
 
-let toc = [];
-
-const renderer = {
-    heading(text, level, raw) {
-        const tocItem = {label: raw, level};
-        toc.push(tocItem);
-
-        return `<a id="${raw}"><h${level}>${text}</h${level}></a>\n`;
-    }
-}
-
-marked.use({renderer});
-
 marked.setOptions({
     highlight: function(code) {
         return hljs.highlightAuto(code).value;
@@ -28,14 +15,28 @@ marked.setOptions({
     xhtml: false
 });
 
-function parseMarkDown(markDownString) {
-    const content = marked(markDownString).replace(/<pre>/g, "<pre class='hljs'>");
-    const dir = toc;
-    toc = [];
-    return [content, dir];
+class MarkdownUtil {
+    constructor() {
+        this.toc = [];
+        this.content = '';
+    }
+
+    parseMarkdown(markDownString) {
+        const that = this;
+        const renderer = {
+            heading(text, level, raw) {
+                const tocItem = {label: raw, level};
+                that.toc.push(tocItem);
+
+                return `<a id="${raw}"><h${level}>${text}</h${level}></a>`;
+            },
+            paragraph(text) {
+                return text.replace(/\n/g, "<br/>");
+            }
+        }
+        marked.use({renderer});
+        this.content = marked(markDownString).replace(/<pre>/g, "<pre class='hljs'>");
+    }
 }
 
-
-
-
-module.exports.parseMarkDown = parseMarkDown;
+module.exports = MarkdownUtil;
